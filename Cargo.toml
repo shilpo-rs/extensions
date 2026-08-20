@@ -14,4 +14,4 @@ wit-bindgen = "0.60"
 # WIT bindings come from the SDK rather than a relative path into the monorepo.
 # Pinned by exact rev, never a branch, so builds stay reproducible (matches the
 # gpui fork pin in shilpo-rs/shilpo).
-shilpo-ext-sdk = { git = "https://github.com/shilpo-rs/shilpo", rev = "898920e8bfc9ecd319d95fe42a7cad171fec4e5d" }
+shilpo-ext-sdk = { git = "https://github.com/shilpo-rs/sdks", rev = "c48c0f0c8736d7398d0b091d1f23f63963d9f897" }
