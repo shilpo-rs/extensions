@@ -1,0 +1,6 @@
+/target
+/*/target
+/*/extension.wasm
+/example/node_modules/
+/example/dist/
+*.wasm
