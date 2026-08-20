@@ -1,1 +1,0 @@
-/tmp/claude-1000/-home-hitarashi-sayeed-github-shilpo/196c44e9-df7d-458a-af88-9fec0f2de415/scratchpad/ext/target/wasm32-wasip2/release/libworld_clock_extension.rlib: /tmp/claude-1000/-home-hitarashi-sayeed-github-shilpo/196c44e9-df7d-458a-af88-9fec0f2de415/scratchpad/ext/world-clock/src/lib.rs
