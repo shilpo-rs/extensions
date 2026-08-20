@@ -43,7 +43,8 @@ impl WallpaperExtensionState {
         if self.curated_wallpapers.is_empty() {
             return String::new();
         }
-        let path = self.curated_wallpapers[self.current_index % self.curated_wallpapers.len()].clone();
+        let path =
+            self.curated_wallpapers[self.current_index % self.curated_wallpapers.len()].clone();
         self.current_index = (self.current_index + 1) % self.curated_wallpapers.len();
         path
     }
@@ -52,7 +53,9 @@ impl WallpaperExtensionState {
         if self.curated_wallpapers.is_empty() {
             return String::new();
         }
-        let hash = workspace_id.bytes().fold(0usize, |acc, b| acc.wrapping_add(b as usize));
+        let hash = workspace_id
+            .bytes()
+            .fold(0usize, |acc, b| acc.wrapping_add(b as usize));
         self.curated_wallpapers[hash % self.curated_wallpapers.len()].clone()
     }
 
@@ -68,12 +71,8 @@ mod guest {
     use super::{WallpaperExtensionSettings, WallpaperExtensionState};
     use std::cell::RefCell;
 
-    wit_bindgen::generate!({
-        path: "../../core/ext-api/wit",
-        world: "extension",
-    });
-
-    use shilpo::extension::{events, types, view, wallpaper};
+    use shilpo_ext_sdk::bindings::Guest;
+    use shilpo_ext_sdk::bindings::shilpo::extension::{events, types, view, wallpaper};
 
     fn settings_from_value(value: types::DataValue) -> Option<WallpaperExtensionSettings> {
         let bytes = match value {
@@ -117,15 +116,26 @@ mod guest {
                         match req.reason {
                             wallpaper::WallpaperRequestReason::WorkspaceChanged => {
                                 let ws_id = match &req.target {
-                                    wallpaper::WallpaperTarget::Workspace(w) => w.workspace_id.as_str(),
+                                    wallpaper::WallpaperTarget::Workspace(w) => {
+                                        w.workspace_id.as_str()
+                                    }
                                     wallpaper::WallpaperTarget::Global => "0",
                                 };
                                 let mapped = state.settings.workspace_map.get(ws_id).cloned();
-                                (mapped.unwrap_or_else(|| state.wallpaper_for_workspace(ws_id)), wallpaper::WallpaperSource::LocalFile)
+                                (
+                                    mapped.unwrap_or_else(|| state.wallpaper_for_workspace(ws_id)),
+                                    wallpaper::WallpaperSource::LocalFile,
+                                )
                             }
                             _ if req.reason == wallpaper::WallpaperRequestReason::SlideshowTick
-                                && !state.settings.slideshow_enabled => (String::new(), wallpaper::WallpaperSource::LocalFile),
-                            _ => (state.next_wallpaper_path(), wallpaper::WallpaperSource::LocalFile),
+                                && !state.settings.slideshow_enabled =>
+                            {
+                                (String::new(), wallpaper::WallpaperSource::LocalFile)
+                            }
+                            _ => (
+                                state.next_wallpaper_path(),
+                                wallpaper::WallpaperSource::LocalFile,
+                            ),
                         }
                     });
 
@@ -164,7 +174,7 @@ mod guest {
         }
     }
 
-    export!(WallpaperExtension);
+    shilpo_ext_sdk::bindings::export!(WallpaperExtension with_types_in shilpo_ext_sdk::bindings::generated);
 }
 
 #[cfg(test)]

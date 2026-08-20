@@ -13,4 +13,4 @@ serde.workspace = true
 serde_json.workspace = true
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-wit-bindgen.workspace = true
+shilpo-ext-sdk.workspace = true

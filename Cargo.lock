@@ -172,12 +172,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "shilpo-ext-sdk"
+version = "0.1.0"
+source = "git+https://github.com/shilpo-rs/shilpo?rev=898920e8bfc9ecd319d95fe42a7cad171fec4e5d#898920e8bfc9ecd319d95fe42a7cad171fec4e5d"
+dependencies = [
+ "wit-bindgen",
+]
+
+[[package]]
 name = "shilpo-wallpaper-extension"
 version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",
- "wit-bindgen",
+ "shilpo-ext-sdk",
 ]
 
 [[package]]
@@ -186,7 +194,7 @@ version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",
- "wit-bindgen",
+ "shilpo-ext-sdk",
 ]
 
 [[package]]
@@ -348,7 +356,7 @@ version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",
- "wit-bindgen",
+ "shilpo-ext-sdk",
 ]
 
 [[package]]

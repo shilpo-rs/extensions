@@ -1,7 +1,7 @@
 #![cfg_attr(not(any(target_arch = "wasm32", test)), allow(dead_code))]
 
 use serde::Deserialize;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
 const GEOCODE_REQUEST: &str = "weather-geocode";
 const IP_GEOCODE_REQUEST: &str = "weather-ip-geocode";
@@ -593,12 +593,8 @@ mod guest {
     use super::WeatherState;
     use std::cell::RefCell;
 
-    wit_bindgen::generate!({
-        path: "../../core/ext-api/wit",
-        world: "extension",
-    });
-
-    use shilpo::extension::{events, types, view};
+    use shilpo_ext_sdk::bindings::Guest;
+    use shilpo_ext_sdk::bindings::shilpo::extension::{events, types, view};
 
     thread_local! {
         static STATE: RefCell<WeatherState> = RefCell::new(WeatherState::default());
@@ -631,7 +627,7 @@ mod guest {
         }
     }
 
-    export!(WeatherExtension);
+    shilpo_ext_sdk::bindings::export!(WeatherExtension with_types_in shilpo_ext_sdk::bindings::generated);
 }
 
 #[cfg(test)]
@@ -670,10 +666,12 @@ mod tests {
         });
         let forecast_request = effects[0]["request_id"].as_str().unwrap().to_owned();
         assert!(forecast_request.starts_with(FORECAST_REQUEST));
-        assert!(effects[0]["url"]
-            .as_str()
-            .unwrap()
-            .contains("latitude=22.5726"));
+        assert!(
+            effects[0]["url"]
+                .as_str()
+                .unwrap()
+                .contains("latitude=22.5726")
+        );
     }
 
     #[test]
@@ -702,10 +700,12 @@ mod tests {
         });
         let forecast_request = effects[0]["request_id"].as_str().unwrap().to_owned();
         assert!(forecast_request.starts_with(FORECAST_REQUEST));
-        assert!(effects[0]["url"]
-            .as_str()
-            .unwrap()
-            .contains("latitude=22.5726"));
+        assert!(
+            effects[0]["url"]
+                .as_str()
+                .unwrap()
+                .contains("latitude=22.5726")
+        );
     }
 
     #[test]
@@ -734,10 +734,12 @@ mod tests {
         });
         let forecast_request = effects[0]["request_id"].as_str().unwrap().to_owned();
         assert!(forecast_request.starts_with(FORECAST_REQUEST));
-        assert!(effects[0]["url"]
-            .as_str()
-            .unwrap()
-            .contains("latitude=22.5726"));
+        assert!(
+            effects[0]["url"]
+                .as_str()
+                .unwrap()
+                .contains("latitude=22.5726")
+        );
 
         let effects = state.handle_event(Event::HttpResponse {
             request_id: forecast_request,
@@ -773,10 +775,12 @@ mod tests {
                 "longitude": 88.3639
             }),
         });
-        assert!(effects[0]["request_id"]
-            .as_str()
-            .unwrap()
-            .starts_with(FORECAST_REQUEST));
+        assert!(
+            effects[0]["request_id"]
+                .as_str()
+                .unwrap()
+                .starts_with(FORECAST_REQUEST)
+        );
     }
 
     #[test]
@@ -796,10 +800,12 @@ mod tests {
         let effects = state.handle_event(Event::TimerFired {
             name: "minute".into(),
         });
-        assert!(effects[0]["request_id"]
-            .as_str()
-            .unwrap()
-            .starts_with(FORECAST_REQUEST));
+        assert!(
+            effects[0]["request_id"]
+                .as_str()
+                .unwrap()
+                .starts_with(FORECAST_REQUEST)
+        );
     }
 
     #[test]

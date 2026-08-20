@@ -4,12 +4,8 @@
 mod guest {
     use std::cell::RefCell;
 
-    wit_bindgen::generate!({
-        path: "../../core/ext-api/wit",
-        world: "extension",
-    });
-
-    use shilpo::extension::{events, notifications, types, view};
+    use shilpo_ext_sdk::bindings::Guest;
+    use shilpo_ext_sdk::bindings::shilpo::extension::{events, notifications, types, view};
 
     #[derive(Default)]
     struct ClockState {
@@ -79,5 +75,5 @@ mod guest {
         }
     }
 
-    export!(WorldClock);
+    shilpo_ext_sdk::bindings::export!(WorldClock with_types_in shilpo_ext_sdk::bindings::generated);
 }

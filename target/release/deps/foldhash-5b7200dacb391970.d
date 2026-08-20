@@ -1,0 +1,10 @@
+/tmp/claude-1000/-home-hitarashi-sayeed-github-shilpo/196c44e9-df7d-458a-af88-9fec0f2de415/scratchpad/ext/target/release/deps/foldhash-5b7200dacb391970.d: /home/hitarashi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/foldhash-0.2.0/src/lib.rs /home/hitarashi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/foldhash-0.2.0/src/fast.rs /home/hitarashi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/foldhash-0.2.0/src/quality.rs /home/hitarashi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/foldhash-0.2.0/src/seed.rs
+
+/tmp/claude-1000/-home-hitarashi-sayeed-github-shilpo/196c44e9-df7d-458a-af88-9fec0f2de415/scratchpad/ext/target/release/deps/libfoldhash-5b7200dacb391970.rlib: /home/hitarashi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/foldhash-0.2.0/src/lib.rs /home/hitarashi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/foldhash-0.2.0/src/fast.rs /home/hitarashi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/foldhash-0.2.0/src/quality.rs /home/hitarashi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/foldhash-0.2.0/src/seed.rs
+
+/tmp/claude-1000/-home-hitarashi-sayeed-github-shilpo/196c44e9-df7d-458a-af88-9fec0f2de415/scratchpad/ext/target/release/deps/libfoldhash-5b7200dacb391970.rmeta: /home/hitarashi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/foldhash-0.2.0/src/lib.rs /home/hitarashi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/foldhash-0.2.0/src/fast.rs /home/hitarashi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/foldhash-0.2.0/src/quality.rs /home/hitarashi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/foldhash-0.2.0/src/seed.rs
+
+/home/hitarashi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/foldhash-0.2.0/src/lib.rs:
+/home/hitarashi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/foldhash-0.2.0/src/fast.rs:
+/home/hitarashi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/foldhash-0.2.0/src/quality.rs:
+/home/hitarashi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/foldhash-0.2.0/src/seed.rs:

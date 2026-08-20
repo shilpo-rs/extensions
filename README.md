@@ -1,16 +1,19 @@
-# Official Shilpo Extensions
+# Shilpo Extensions
 
-Each directory is an independently packaged Shilpo extension crate. The nested workspace keeps WASI guest builds out of
-the main native workspace while sharing a lockfile for reproducible official builds.
+First-party sandboxed WebAssembly extensions for [Shilpo](https://github.com/shilpo-rs/shilpo):
+`wallpaper`, `weather`, and `world-clock`, plus the TypeScript showcase in `example/`.
 
-Build all official extension guests:
+## Building
 
 ```bash
-cargo build --manifest-path extensions/Cargo.toml --workspace \
-  --target wasm32-wasip2 --release
+rustup target add wasm32-wasip2
+cargo build --workspace --target wasm32-wasip2 --release
 ```
 
-Each extension README documents the command that copies its component beside `extension.toml`, validates the package,
-and runs it in development mode. Official trust is assigned only when the release is signed and published through
-Shilpo's official registry; living in this source directory does not grant permissions or trust.
+## Relationship to the main repository
 
+These extensions consume the canonical `shilpo:extension` WIT contract through
+the `shilpo-ext-sdk` crate, which is pulled from `shilpo-rs/shilpo` as a git
+dependency **pinned to an exact revision** (never a branch) so builds stay
+reproducible. To adopt a newer contract, bump the `rev` in the workspace
+`Cargo.toml`.

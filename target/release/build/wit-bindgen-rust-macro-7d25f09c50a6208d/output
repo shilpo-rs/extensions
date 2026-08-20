@@ -1,0 +1,2 @@
+cargo:rerun-if-changed=build.rs
+cargo:rustc-env=DEBUG_OUTPUT_DIR=/tmp/claude-1000/-home-hitarashi-sayeed-github-shilpo/196c44e9-df7d-458a-af88-9fec0f2de415/scratchpad/ext/target/release/build/wit-bindgen-rust-macro-7d25f09c50a6208d/out
