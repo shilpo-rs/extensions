@@ -36,3 +36,12 @@ jobs:
 
       - name: Verify clean worktree
         run: test -z "$(git status --porcelain --untracked-files=all)"
+
+  supply-chain:
+    name: Supply Chain (cargo-deny)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@cargo-deny
+      - run: timeout 5m cargo deny check bans licenses sources
