@@ -1,9 +1,9 @@
 # Shilpo Extensions
 
 First-party sandboxed WebAssembly extensions for [Shilpo](https://github.com/shilpo-rs/shilpo):
-`extensions/org.shilpo.wallpaper`, `extensions/org.shilpo.weather`, and `extensions/io.github.sayeed205.world-clock`, plus the TypeScript showcase in `extensions/org.shilpo.example/`.
+`extensions/org.shilpo.wallpaper`, `extensions/org.shilpo.weather`, and `extensions/io.github.sayeed205.world-clock`.
 
-Reference trusted local scripts (unsandboxed, local-only) live in `local-scripts/` and have no registry distribution path. See [CONTRIBUTING.md](CONTRIBUTING.md) for extension submission and authoring guidelines.
+Reference trusted local scripts (unsandboxed, local-only) live in `local-scripts/` and have no registry distribution path. The TypeScript showcase extension lives in `pending-ci-support/org.shilpo.example/` — see that directory's README for why it's excluded from the automated registry pipeline for now. See [CONTRIBUTING.md](CONTRIBUTING.md) for extension submission and authoring guidelines.
 
 ## Building
 

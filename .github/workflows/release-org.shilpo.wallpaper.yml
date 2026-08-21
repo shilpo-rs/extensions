@@ -1,0 +1,13 @@
+name: Release org.shilpo.wallpaper
+
+on:
+  push:
+    tags:
+      - "org.shilpo.wallpaper-v*"
+
+jobs:
+  release:
+    uses: ./.github/workflows/release-extension.yml
+    with:
+      extension_id: org.shilpo.wallpaper
+    secrets: inherit

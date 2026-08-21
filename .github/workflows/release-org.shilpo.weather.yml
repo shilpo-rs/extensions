@@ -1,0 +1,13 @@
+name: Release org.shilpo.weather
+
+on:
+  push:
+    tags:
+      - "org.shilpo.weather-v*"
+
+jobs:
+  release:
+    uses: ./.github/workflows/release-extension.yml
+    with:
+      extension_id: org.shilpo.weather
+    secrets: inherit

@@ -78,6 +78,12 @@ enum Commands {
 
         #[arg(long)]
         commit_timestamp: Option<String>,
+
+        /// Restrict to a single extension directory name. Used by the per-extension
+        /// tag-triggered release workflow so a release only re-signs the one extension
+        /// whose tag was pushed, merging it into the existing signed index.
+        #[arg(long)]
+        only: Option<String>,
     },
 
     /// Emits JSON Schema from canonical contract types
@@ -102,6 +108,10 @@ enum Commands {
 
         #[arg(long, default_value = "dist")]
         output_dir: PathBuf,
+
+        /// Restrict to a single extension directory name.
+        #[arg(long)]
+        only: Option<String>,
     },
 
     /// Signs index and packages using Ed25519 private keys
@@ -191,6 +201,7 @@ fn main() -> ExitCode {
             base_url,
             output,
             commit_timestamp,
+            only,
         } => {
             let options = GeneratorOptions {
                 extensions_dir,
@@ -199,6 +210,7 @@ fn main() -> ExitCode {
                 previous_index_path: previous_index,
                 base_url,
                 commit_timestamp,
+                only_id: only,
                 ..Default::default()
             };
 
@@ -265,8 +277,9 @@ fn main() -> ExitCode {
             extensions_dir,
             target_dir,
             output_dir,
+            only,
         } => {
-            match generator::pack_extensions(&extensions_dir, &target_dir, &output_dir) {
+            match generator::pack_extensions(&extensions_dir, &target_dir, &output_dir, only.as_deref()) {
                 Ok(packed) => {
                     println!("✅ Successfully packed {} extension(s):", packed.len());
                     for p in packed {

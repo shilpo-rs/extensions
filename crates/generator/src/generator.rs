@@ -22,6 +22,11 @@ pub struct GeneratorOptions {
     pub base_url: String,
     pub source_id: String,
     pub commit_timestamp: Option<String>,
+    /// Restrict the scan to a single extension directory name. Used by the per-extension
+    /// tag-triggered release workflow: a release only ever builds and re-signs the one
+    /// extension whose tag was pushed, merging that single new release into the existing
+    /// signed index rather than re-scanning (and re-building) every extension in the repo.
+    pub only_id: Option<String>,
 }
 
 impl Default for GeneratorOptions {
@@ -34,6 +39,7 @@ impl Default for GeneratorOptions {
             base_url: "https://github.com/shilpo-rs/extensions/releases/download".into(),
             source_id: OFFICIAL_SOURCE_ID.into(),
             commit_timestamp: None,
+            only_id: None,
         }
     }
 }
@@ -183,6 +189,14 @@ pub fn generate_index(options: &GeneratorOptions) -> Result<RegistryIndex, Strin
             .and_then(|n| n.to_str())
             .ok_or_else(|| format!("invalid directory name at '{}'", path.display()))?;
 
+        if options
+            .only_id
+            .as_deref()
+            .is_some_and(|id| id != dir_name)
+        {
+            continue;
+        }
+
         let manifest = parse_and_validate_manifest(&path, Some(dir_name))?;
         owners.verify_ownership(&manifest.id, None)?;
 
@@ -267,6 +281,15 @@ pub fn generate_index(options: &GeneratorOptions) -> Result<RegistryIndex, Strin
         scanned_releases.push(release);
     }
 
+    if let Some(id) = &options.only_id {
+        if scanned_releases.is_empty() {
+            return Err(format!(
+                "only_id '{id}' matched no directory under '{}'",
+                options.extensions_dir.display()
+            ));
+        }
+    }
+
     // Merge with previous index releases
     let mut all_releases_map: BTreeMap<(String, Version), RegistryRelease> = BTreeMap::new();
 
@@ -333,6 +356,7 @@ pub fn pack_extensions(
     extensions_dir: &Path,
     wasm_target_dir: &Path,
     output_dir: &Path,
+    only_id: Option<&str>,
 ) -> Result<Vec<PathBuf>, String> {
     use flate2::Compression;
     use flate2::write::GzEncoder;
@@ -357,6 +381,10 @@ pub fn pack_extensions(
             .file_name()
             .and_then(|n| n.to_str())
             .ok_or_else(|| format!("invalid directory name at '{}'", path.display()))?;
+
+        if only_id.is_some_and(|id| id != dir_name) {
+            continue;
+        }
 
         let manifest = parse_and_validate_manifest(&path, Some(dir_name))?;
 
@@ -415,9 +443,26 @@ pub fn pack_extensions(
         packed.push(archive_path);
     }
 
+    if let Some(id) = only_id {
+        if packed.is_empty() {
+            return Err(format!(
+                "--only '{id}' matched no directory under '{}'",
+                extensions_dir.display()
+            ));
+        }
+    }
+
     Ok(packed)
 }
 
+/// Resolves the exact WASM component belonging to one extension. Never guesses: either it
+/// finds the binary this specific extension actually produced, or it fails loudly. A
+/// previous version of this function fell back to scanning `wasm_target_dir` for any
+/// `.wasm` file whose name loosely matched (e.g. containing the literal substring
+/// "extension"), which every Rust-built extension's filename does — so a non-Rust
+/// extension with no resolvable binary silently got packaged with whichever unrelated
+/// extension's binary happened to appear first in that directory listing, signed and
+/// published as if it were its own.
 fn find_wasm_binary(ext_dir: &Path, wasm_target_dir: &Path) -> Result<PathBuf, String> {
     let local_wasm = ext_dir.join("extension.wasm");
     if local_wasm.is_file() {
@@ -428,41 +473,38 @@ fn find_wasm_binary(ext_dir: &Path, wasm_target_dir: &Path) -> Result<PathBuf, S
     if cargo_toml.is_file() {
         let content = fs::read_to_string(&cargo_toml)
             .map_err(|err| format!("failed to read Cargo.toml in '{}': {err}", ext_dir.display()))?;
-        if let Ok(toml_val) = toml::from_str::<toml::Value>(&content) {
-            if let Some(pkg_name) = toml_val.get("package").and_then(|p| p.get("name")).and_then(|n| n.as_str()) {
-                let wasm_name = format!("{}.wasm", pkg_name.replace('-', "_"));
-                let candidate = wasm_target_dir.join(&wasm_name);
-                if candidate.is_file() {
-                    return Ok(candidate);
-                }
-            }
+        let toml_val: toml::Value = toml::from_str(&content)
+            .map_err(|err| format!("failed to parse Cargo.toml in '{}': {err}", ext_dir.display()))?;
+        let pkg_name = toml_val
+            .get("package")
+            .and_then(|p| p.get("name"))
+            .and_then(|n| n.as_str())
+            .ok_or_else(|| {
+                format!(
+                    "Cargo.toml in '{}' has no [package].name to resolve a WASM binary from",
+                    ext_dir.display()
+                )
+            })?;
+        let wasm_name = format!("{}.wasm", pkg_name.replace('-', "_"));
+        let candidate = wasm_target_dir.join(&wasm_name);
+        if candidate.is_file() {
+            return Ok(candidate);
         }
-    }
-
-    if wasm_target_dir.is_dir() {
-        if let Ok(entries) = fs::read_dir(wasm_target_dir) {
-            for entry in entries.flatten() {
-                let p = entry.path();
-                if p.extension().is_some_and(|ext| ext == "wasm") {
-                    let file_stem = p.file_stem().and_then(|s| s.to_str()).unwrap_or("");
-                    let ext_name = ext_dir.file_name().and_then(|s| s.to_str()).unwrap_or("");
-                    if ext_name.contains(file_stem)
-                        || file_stem.contains("extension")
-                        || file_stem.contains("wallpaper")
-                        || file_stem.contains("weather")
-                        || file_stem.contains("world_clock")
-                    {
-                        return Ok(p);
-                    }
-                }
-            }
-        }
+        return Err(format!(
+            "extension '{}' declares a Cargo package '{pkg_name}', but '{}' was not found in '{}' \
+             — did the build step run and produce this exact filename?",
+            ext_dir.display(),
+            wasm_name,
+            wasm_target_dir.display()
+        ));
     }
 
     Err(format!(
-        "could not find WASM binary for '{}' in target directory '{}'",
-        ext_dir.display(),
-        wasm_target_dir.display()
+        "extension '{}' has no local extension.wasm and no Cargo.toml, so there is no \
+         deterministic way to resolve its WASM binary. Non-Rust extensions must either commit \
+         a pre-built extension.wasm, or the pipeline must gain a real build step for their \
+         toolchain before they can be scanned here.",
+        ext_dir.display()
     ))
 }
 

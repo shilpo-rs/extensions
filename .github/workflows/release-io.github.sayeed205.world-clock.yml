@@ -1,0 +1,13 @@
+name: Release io.github.sayeed205.world-clock
+
+on:
+  push:
+    tags:
+      - "io.github.sayeed205.world-clock-v*"
+
+jobs:
+  release:
+    uses: ./.github/workflows/release-extension.yml
+    with:
+      extension_id: io.github.sayeed205.world-clock
+    secrets: inherit
