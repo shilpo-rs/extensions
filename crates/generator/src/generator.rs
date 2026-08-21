@@ -319,6 +319,172 @@ pub fn load_index_file(path: &Path) -> Result<RegistryIndex, String> {
     })
 }
 
+pub fn pack_extensions(
+    extensions_dir: &Path,
+    wasm_target_dir: &Path,
+    output_dir: &Path,
+) -> Result<Vec<PathBuf>, String> {
+    use flate2::Compression;
+    use flate2::write::GzEncoder;
+    use tar::Builder;
+
+    fs::create_dir_all(output_dir)
+        .map_err(|err| format!("failed to create output directory '{}': {err}", output_dir.display()))?;
+
+    let entries = fs::read_dir(extensions_dir)
+        .map_err(|err| format!("failed to read extensions dir '{}': {err}", extensions_dir.display()))?;
+
+    let mut packed = Vec::new();
+
+    for entry in entries {
+        let entry = entry.map_err(|err| format!("failed to read entry: {err}"))?;
+        let path = entry.path();
+        if !path.is_dir() {
+            continue;
+        }
+
+        let dir_name = path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .ok_or_else(|| format!("invalid directory name at '{}'", path.display()))?;
+
+        let manifest = parse_and_validate_manifest(&path, Some(dir_name))?;
+
+        let archive_name = format!("{}-{}.shilpo-ext", manifest.id, manifest.version);
+        let archive_path = output_dir.join(&archive_name);
+
+        let file = fs::File::create(&archive_path)
+            .map_err(|err| format!("failed to create archive file '{}': {err}", archive_path.display()))?;
+        let enc = GzEncoder::new(file, Compression::default());
+        let mut tar = Builder::new(enc);
+
+        // 1. Add extension.toml
+        tar.append_path_with_name(path.join("extension.toml"), "extension.toml")
+            .map_err(|err| format!("failed to append extension.toml: {err}"))?;
+
+        // 2. Add WASM binary if declared in manifest.library
+        if let Some(library) = &manifest.library {
+            let wasm_file = find_wasm_binary(&path, wasm_target_dir)?;
+            tar.append_path_with_name(&wasm_file, &library.path)
+                .map_err(|err| format!("failed to append {}: {err}", library.path))?;
+        }
+
+        // 3. Add settings.schema.json if exists
+        let settings = path.join("settings.schema.json");
+        if settings.is_file() {
+            tar.append_path_with_name(&settings, "settings.schema.json")
+                .map_err(|err| format!("failed to append settings.schema.json: {err}"))?;
+        }
+
+        // 4. Add assets/ if exists
+        let assets = path.join("assets");
+        if assets.is_dir() {
+            tar.append_dir_all("assets", &assets)
+                .map_err(|err| format!("failed to append assets: {err}"))?;
+        }
+
+        // 5. Add README.md if exists
+        let readme = path.join("README.md");
+        if readme.is_file() {
+            tar.append_path_with_name(&readme, "README.md")
+                .map_err(|err| format!("failed to append README.md: {err}"))?;
+        }
+
+        // 6. Add LICENSE if exists
+        let license = path.join("LICENSE");
+        if license.is_file() {
+            tar.append_path_with_name(&license, "LICENSE")
+                .map_err(|err| format!("failed to append LICENSE: {err}"))?;
+        }
+
+        tar.into_inner()
+            .map_err(|err| format!("failed to finalize tar archive: {err}"))?
+            .finish()
+            .map_err(|err| format!("failed to finish gzip compression: {err}"))?;
+
+        packed.push(archive_path);
+    }
+
+    Ok(packed)
+}
+
+fn find_wasm_binary(ext_dir: &Path, wasm_target_dir: &Path) -> Result<PathBuf, String> {
+    let local_wasm = ext_dir.join("extension.wasm");
+    if local_wasm.is_file() {
+        return Ok(local_wasm);
+    }
+
+    let cargo_toml = ext_dir.join("Cargo.toml");
+    if cargo_toml.is_file() {
+        let content = fs::read_to_string(&cargo_toml)
+            .map_err(|err| format!("failed to read Cargo.toml in '{}': {err}", ext_dir.display()))?;
+        if let Ok(toml_val) = toml::from_str::<toml::Value>(&content) {
+            if let Some(pkg_name) = toml_val.get("package").and_then(|p| p.get("name")).and_then(|n| n.as_str()) {
+                let wasm_name = format!("{}.wasm", pkg_name.replace('-', "_"));
+                let candidate = wasm_target_dir.join(&wasm_name);
+                if candidate.is_file() {
+                    return Ok(candidate);
+                }
+            }
+        }
+    }
+
+    if wasm_target_dir.is_dir() {
+        if let Ok(entries) = fs::read_dir(wasm_target_dir) {
+            for entry in entries.flatten() {
+                let p = entry.path();
+                if p.extension().is_some_and(|ext| ext == "wasm") {
+                    let file_stem = p.file_stem().and_then(|s| s.to_str()).unwrap_or("");
+                    let ext_name = ext_dir.file_name().and_then(|s| s.to_str()).unwrap_or("");
+                    if ext_name.contains(file_stem)
+                        || file_stem.contains("extension")
+                        || file_stem.contains("wallpaper")
+                        || file_stem.contains("weather")
+                        || file_stem.contains("world_clock")
+                    {
+                        return Ok(p);
+                    }
+                }
+            }
+        }
+    }
+
+    Err(format!(
+        "could not find WASM binary for '{}' in target directory '{}'",
+        ext_dir.display(),
+        wasm_target_dir.display()
+    ))
+}
+
+pub fn sign_index_and_packages(
+    unsigned_index: RegistryIndex,
+    dist_dir: Option<&Path>,
+    package_signing_key: Option<&str>,
+    index_signing_key: &str,
+) -> Result<SignedRegistryIndex, String> {
+    use shilpo_registry_contract::{sign_package, sign_release, sign_registry_index};
+
+    let mut index = unsigned_index;
+
+    if let Some(pkg_key) = package_signing_key {
+        for release in &mut index.releases {
+            if let Some(dist) = dist_dir {
+                let pkg_name = format!("{}-{}.shilpo-ext", release.id, release.version);
+                let pkg_path = dist.join(&pkg_name);
+                if pkg_path.is_file() {
+                    sign_package(&pkg_path, &release.publisher, pkg_key)
+                        .map_err(|err| format!("failed to sign package '{}': {err}", pkg_path.display()))?;
+                }
+            }
+            sign_release(release, pkg_key)
+                .map_err(|err| format!("failed to sign release '{}': {err}", release.id))?;
+        }
+    }
+
+    sign_registry_index(index, index_signing_key)
+        .map_err(|err| format!("failed to sign registry index: {err}"))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

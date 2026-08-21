@@ -78,6 +78,36 @@ enum Commands {
         #[arg(long, default_value = "schema/registry-index-v1.schema.json")]
         schema_file: PathBuf,
     },
+
+    /// Packs extensions into .shilpo-ext archives
+    Pack {
+        #[arg(long, default_value = "extensions")]
+        extensions_dir: PathBuf,
+
+        #[arg(long, default_value = "target/wasm32-wasip2/release")]
+        target_dir: PathBuf,
+
+        #[arg(long, default_value = "dist")]
+        output_dir: PathBuf,
+    },
+
+    /// Signs index and packages using Ed25519 private keys
+    Sign {
+        #[arg(long)]
+        unsigned_index: PathBuf,
+
+        #[arg(long)]
+        dist_dir: Option<PathBuf>,
+
+        #[arg(long, env = "INDEX_SIGNING_KEY")]
+        index_signing_key: String,
+
+        #[arg(long, env = "PACKAGE_SIGNING_KEY")]
+        package_signing_key: Option<String>,
+
+        #[arg(long, default_value = "index.json")]
+        output: PathBuf,
+    },
 }
 
 fn main() -> ExitCode {
@@ -210,6 +240,73 @@ fn main() -> ExitCode {
                 schema_file.display()
             );
             ExitCode::SUCCESS
+        }
+
+        Commands::Pack {
+            extensions_dir,
+            target_dir,
+            output_dir,
+        } => {
+            match generator::pack_extensions(&extensions_dir, &target_dir, &output_dir) {
+                Ok(packed) => {
+                    println!("✅ Successfully packed {} extension(s):", packed.len());
+                    for p in packed {
+                        println!("   📦 {}", p.display());
+                    }
+                    ExitCode::SUCCESS
+                }
+                Err(err) => {
+                    eprintln!("❌ Packaging error: {err}");
+                    return ExitCode::FAILURE;
+                }
+            }
+        }
+
+        Commands::Sign {
+            unsigned_index,
+            dist_dir,
+            index_signing_key,
+            package_signing_key,
+            output,
+        } => {
+            let index = match generator::load_index_file(&unsigned_index) {
+                Ok(idx) => idx,
+                Err(err) => {
+                    eprintln!("❌ Failed to load unsigned index '{}': {err}", unsigned_index.display());
+                    return ExitCode::FAILURE;
+                }
+            };
+
+            match generator::sign_index_and_packages(
+                index,
+                dist_dir.as_deref(),
+                package_signing_key.as_deref(),
+                &index_signing_key,
+            ) {
+                Ok(signed) => {
+                    let json = match serde_json::to_string_pretty(&signed) {
+                        Ok(json) => json,
+                        Err(err) => {
+                            eprintln!("❌ JSON serialization error: {err}");
+                            return ExitCode::FAILURE;
+                        }
+                    };
+
+                    if let Some(parent) = output.parent() {
+                        let _ = fs::create_dir_all(parent);
+                    }
+                    if let Err(err) = fs::write(&output, format!("{json}\n")) {
+                        eprintln!("❌ Failed to write signed index '{}': {err}", output.display());
+                        return ExitCode::FAILURE;
+                    }
+                    println!("✅ Successfully signed index and written to '{}'.", output.display());
+                    ExitCode::SUCCESS
+                }
+                Err(err) => {
+                    eprintln!("❌ Signing error: {err}");
+                    return ExitCode::FAILURE;
+                }
+            }
         }
     }
 }
