@@ -18,6 +18,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
 
       - name: Set up Rust toolchain
         run: |
@@ -30,11 +32,27 @@ jobs:
       - name: Run generator unit & integration tests
         run: cargo test --manifest-path crates/generator/Cargo.toml
 
+      - name: Determine which extension directories this PR changed
+        id: changed
+        run: |
+          git fetch origin "${{ github.event.pull_request.base.ref }}"
+          CHANGED_DIRS=$(git diff --name-only "origin/${{ github.event.pull_request.base.ref }}...HEAD" -- extensions/ \
+            | cut -d/ -f2 | sort -u)
+          {
+            echo "args<<EOF"
+            for dir in $CHANGED_DIRS; do
+              echo "--changed-dir=$dir"
+            done
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Validate extensions & check capability diffs
         run: |
           cargo run --manifest-path crates/generator/Cargo.toml -- validate \
             --pr-author "${{ github.event.pull_request.user.login }}" \
-            --schema-file schema/registry-index-v1.schema.json
+            --schema-file schema/registry-index-v1.schema.json \
+            --scope-to-diff \
+            ${{ steps.changed.outputs.args }}
 
   build-extensions:
     name: Build WASM Components
@@ -70,5 +88,5 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: taiki-e/install-action@b7ec081b7e452a321943c260381fa6d01309d43d # v2
+      - uses: taiki-e/install-action@899b013517f9e7774591216672bf75a46bb9a481 # v2.9.4
       - run: timeout 5m cargo deny check bans licenses sources

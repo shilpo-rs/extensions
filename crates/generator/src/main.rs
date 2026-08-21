@@ -38,6 +38,19 @@ enum Commands {
 
         #[arg(long, default_value = "schema/registry-index-v1.schema.json")]
         schema_file: PathBuf,
+
+        /// Extension directory name (under extensions/) that this PR actually changed.
+        /// Repeatable. Only has an effect when --scope-to-diff is also passed.
+        #[arg(long = "changed-dir")]
+        changed_dirs: Vec<String>,
+
+        /// Enforce namespace ownership only for the directories named by --changed-dir,
+        /// instead of every extension present in the tree. Pass this from CI, where the
+        /// changed-dir list (however many entries — including zero) reflects a real diff
+        /// against the PR's base branch. Omit it for a manual/ad hoc run with no diff to
+        /// scope to, where every extension should be checked regardless of --changed-dir.
+        #[arg(long)]
+        scope_to_diff: bool,
     },
 
     /// Generates canonical unsigned index.json from scanned extensions
@@ -120,16 +133,22 @@ fn main() -> ExitCode {
             pr_author,
             base_index,
             schema_file,
+            changed_dirs,
+            scope_to_diff,
         } => {
             println!(
                 "🔍 Validating extensions in '{}'...",
                 extensions_dir.display()
             );
+            let changed_set: std::collections::HashSet<String> =
+                changed_dirs.into_iter().collect();
+            let changed_dirs = scope_to_diff.then_some(&changed_set);
             match scan_and_validate(
                 &extensions_dir,
                 &owners_file,
                 pr_author.as_deref(),
                 base_index.as_deref(),
+                changed_dirs,
             ) {
                 Ok(report) => {
                     println!(

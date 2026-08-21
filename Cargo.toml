@@ -2,7 +2,7 @@
 members = [
     "extensions/org.shilpo.wallpaper",
     "extensions/org.shilpo.weather",
-    "extensions/io.github.alice.world-clock",
+    "extensions/io.github.sayeed205.world-clock",
 ]
 exclude = [
     "crates/generator",

@@ -50,6 +50,7 @@ pub fn scan_and_validate(
     owners_path: &Path,
     pr_author: Option<&str>,
     base_index_path: Option<&Path>,
+    changed_dirs: Option<&HashSet<String>>,
 ) -> Result<ValidationReport, String> {
     if !extensions_dir.is_dir() {
         return Err(format!(
@@ -86,8 +87,17 @@ pub fn scan_and_validate(
         // 1. Validate manifest
         let manifest = parse_and_validate_manifest(&path, Some(dir_name))?;
 
-        // 2. Validate namespace ownership
-        owners.verify_ownership(&manifest.id, pr_author)?;
+        // 2. Validate namespace ownership — but only for extensions this PR actually changed.
+        // Pre-existing, untouched extensions were already vetted when they were originally
+        // merged; re-checking them against the current PR's author would reject every PR that
+        // doesn't happen to touch every namespace already in the repo. `changed_dirs: None`
+        // means "no diff information available" (e.g. a direct/manual invocation), in which
+        // case every extension is checked, matching the previous behavior.
+        let should_check_ownership =
+            changed_dirs.map_or(true, |changed| changed.contains(dir_name));
+        if should_check_ownership {
+            owners.verify_ownership(&manifest.id, pr_author)?;
+        }
 
         if !scanned_ids.insert(manifest.id.clone()) {
             return Err(format!(
@@ -532,7 +542,7 @@ path = "extension.wasm"
     #[test]
     fn test_scan_and_validate_success() {
         let (_root, ext_dir, owners_path) = setup_fixture();
-        let report = scan_and_validate(&ext_dir, &owners_path, Some("sayeed205"), None).unwrap();
+        let report = scan_and_validate(&ext_dir, &owners_path, Some("sayeed205"), None, None).unwrap();
         assert_eq!(report.extensions_count, 1);
     }
 

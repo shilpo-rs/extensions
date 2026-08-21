@@ -9,4 +9,8 @@
 
 [namespaces]
 "org.shilpo" = ["sayeed205"]
-"io.github.alice" = ["alice"]
+
+# io.github.<login> namespaces are not pre-registered here — the generator derives ownership
+# for those directly from the ID's <login> segment matching the submitting PR author (see
+# owners.rs verify_ownership, branch 3). world-clock (io.github.sayeed205.world-clock) is an
+# example of this path and needs no entry of its own.
