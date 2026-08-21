@@ -1,0 +1,190 @@
+{
+  "index": {
+    "schema_version": 1,
+    "source_id": "shilpo",
+    "generated_at": "2026-08-21T15:57:41+05:30",
+    "releases": [
+      {
+        "id": "io.github.sayeed205.world-clock",
+        "name": "World Clock",
+        "description": "Shows local time for selected cities.",
+        "publisher": "Sayeed Ahmed<sayeed205@gmail.com>",
+        "version": "1.0.0",
+        "api_version": "0.1.0",
+        "min_shilpo_version": "0.1.0",
+        "channel": "stable",
+        "package_url": "https://github.com/shilpo-rs/extensions/releases/download/io.github.sayeed205.world-clock-v1.0.0/io.github.sayeed205.world-clock-1.0.0.shilpo-ext",
+        "package_hash": "sha256:2c1947018113ba3a7292afc160d9066bb864dd277c5da580d772e104caebecab",
+        "publisher_public_key": "53vvrUs56xU6JL1TbAoVJF/leiFFJ+4zedPQWDCGb/I=",
+        "publisher_signature": "eYUgPkwB5RwTqvckdf8NW+kQb8AJ/R0acxat/RIxDfsAmWZNC+ES1beFm8oxnX7PIOeNaHRYU4UZ+4cBubXcAg==",
+        "capabilities_hash": "sha256:d55131f02407da754564bfce3535b725c0d647c9c0a2a95f6d0d22d2c69299d8",
+        "capabilities": [
+          {
+            "kind": "events:subscribe",
+            "events": [
+              "palette_generated"
+            ]
+          },
+          {
+            "kind": "notifications:show"
+          }
+        ],
+        "published_at": "2026-08-21T15:57:41+05:30",
+        "yanked": false,
+        "official": false,
+        "verified_publisher": true,
+        "open_source": true,
+        "data_only": false,
+        "key_rotation": null
+      },
+      {
+        "id": "org.shilpo.example",
+        "name": "Shilpo Showcase Extension",
+        "description": "Canonical TypeScript showcase extension demonstrating all Shilpo contribution families, least-privilege capabilities, and hermetic testing.",
+        "publisher": "Shilpo Team <team@shilpo.org>",
+        "version": "0.1.0",
+        "api_version": "0.1.0",
+        "min_shilpo_version": "0.1.0",
+        "channel": "stable",
+        "package_url": "https://github.com/shilpo-rs/extensions/releases/download/org.shilpo.example-v0.1.0/org.shilpo.example-0.1.0.shilpo-ext",
+        "package_hash": "sha256:5977b6cd675d92fb0d5e06b401e58ecb6fb8dabf48b59be33d707200cb61c2cd",
+        "publisher_public_key": "53vvrUs56xU6JL1TbAoVJF/leiFFJ+4zedPQWDCGb/I=",
+        "publisher_signature": "rT/+WLkOsYE+g46JQdg5h0RTICtQJ3xEDsDyVnSCzMalXJT3PALb6Cfg26sPOOmZ1lH1xqgFf4rrrMMcsGaSDw==",
+        "capabilities_hash": "sha256:d6c21497948086f1a1e2133c005198a379c71695696862dd4b46ca5660fe017d",
+        "capabilities": [
+          {
+            "kind": "events:subscribe",
+            "events": [
+              "palette_generated",
+              "wallpaper_changed"
+            ]
+          },
+          {
+            "kind": "theme:read"
+          },
+          {
+            "kind": "notifications:show"
+          },
+          {
+            "kind": "clipboard:read"
+          },
+          {
+            "kind": "clipboard:write"
+          },
+          {
+            "kind": "wallpaper:read"
+          },
+          {
+            "kind": "actions:invoke",
+            "actions": [
+              "toggle-power"
+            ]
+          },
+          {
+            "kind": "network:http",
+            "hosts": [
+              "api.example.com"
+            ],
+            "paths": [
+              "/showcase"
+            ]
+          },
+          {
+            "kind": "search:provide"
+          }
+        ],
+        "published_at": "2026-08-21T15:57:41+05:30",
+        "yanked": false,
+        "official": false,
+        "verified_publisher": true,
+        "open_source": true,
+        "data_only": false,
+        "key_rotation": null
+      },
+      {
+        "id": "org.shilpo.wallpaper",
+        "name": "Wallpaper",
+        "description": "Official host-supervised wallpaper provider for Shilpo.",
+        "publisher": "Sayeed Ahmed <sayeed205@gmail.com>",
+        "version": "0.1.0",
+        "api_version": "0.1.0",
+        "min_shilpo_version": "0.1.0",
+        "channel": "stable",
+        "package_url": "https://github.com/shilpo-rs/extensions/releases/download/org.shilpo.wallpaper-v0.1.0/org.shilpo.wallpaper-0.1.0.shilpo-ext",
+        "package_hash": "sha256:a5f50a4ab7a16a276a72ed2975b61d21f4ce11eac636464ccb0b499ff51c2cf9",
+        "publisher_public_key": "53vvrUs56xU6JL1TbAoVJF/leiFFJ+4zedPQWDCGb/I=",
+        "publisher_signature": "HjvNyRzdKjgNrUEFYHsgYnLOUEE3i0nwMrU3pXDPaQhDkN6LIjugmXsRHMuzCrZcbX3XM8zL0bWE3M+rfyghDg==",
+        "capabilities_hash": "sha256:a8b6a1d7ede8f9c85f162ef256ac794066b507ebaa31aff1a900fb93c42fe698",
+        "capabilities": [
+          {
+            "kind": "events:subscribe",
+            "events": [
+              "workspace_changed"
+            ]
+          },
+          {
+            "kind": "wallpaper:set",
+            "sources": [
+              "local_file"
+            ]
+          }
+        ],
+        "published_at": "2026-08-21T15:57:41+05:30",
+        "yanked": false,
+        "official": true,
+        "verified_publisher": true,
+        "open_source": true,
+        "data_only": false,
+        "key_rotation": null
+      },
+      {
+        "id": "org.shilpo.weather",
+        "name": "Weather",
+        "description": "Current weather from Open-Meteo in the Shilpo bar.",
+        "publisher": "Sayeed Ahmed <sayeed205@gmail.com>",
+        "version": "1.0.0",
+        "api_version": "0.2.0",
+        "min_shilpo_version": "0.2.0",
+        "channel": "stable",
+        "package_url": "https://github.com/shilpo-rs/extensions/releases/download/org.shilpo.weather-v1.0.0/org.shilpo.weather-1.0.0.shilpo-ext",
+        "package_hash": "sha256:ad8010054297bea4d8073270582409dbf8836bf101e161698340066740c4154b",
+        "publisher_public_key": "53vvrUs56xU6JL1TbAoVJF/leiFFJ+4zedPQWDCGb/I=",
+        "publisher_signature": "R+KYACG2LiAVtEx7WBor++vycKoq2yrpKZe5TlOpo1dmhsZtBrES4dT2GPEKDpWjdkfO8x3wxi2nRqUf2g4TDA==",
+        "capabilities_hash": "sha256:51a360e15b4aa353eaaef3aaddeff2a66d073e8cce2b7a697ba034b4cc6cccb5",
+        "capabilities": [
+          {
+            "kind": "events:subscribe",
+            "events": [
+              "network_changed",
+              "timer_fired"
+            ]
+          },
+          {
+            "kind": "network:http",
+            "hosts": [
+              "geocoding-api.open-meteo.com",
+              "api.open-meteo.com",
+              "ipwho.is"
+            ],
+            "paths": [
+              "/v1/search*",
+              "/v1/forecast*",
+              "/"
+            ]
+          },
+          {
+            "kind": "location:read"
+          }
+        ],
+        "published_at": "2026-08-21T15:57:41+05:30",
+        "yanked": false,
+        "official": true,
+        "verified_publisher": true,
+        "open_source": true,
+        "data_only": false,
+        "key_rotation": null
+      }
+    ]
+  },
+  "signature": "Gat9YNQxTf5BAWW8Fn1t6Ivti8HFPaFAdlJJB3XNE60mNeLix2YZwwDgwyr/LWx2O5izbf1Wx8EJf0vC0hTnCw=="
+}
