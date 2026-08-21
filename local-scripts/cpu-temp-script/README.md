@@ -52,4 +52,4 @@ On each poll interval, the executable emits a newline-delimited JSON record (`Sc
 }
 ```
 
-See [Trusted Local Scripts Guide](../../docs/extensions/trusted-local-scripts.md) for complete details.
+See the [Trusted Local Scripts Guide](https://github.com/shilpo-rs/shilpo/blob/main/docs/extensions/trusted-local-scripts.md) for complete details.

@@ -3,6 +3,8 @@
 First-party sandboxed WebAssembly extensions for [Shilpo](https://github.com/shilpo-rs/shilpo):
 `wallpaper`, `weather`, and `world-clock`, plus the TypeScript showcase in `example/`.
 
+Reference trusted local scripts (unsandboxed, local-only) live in `local-scripts/` and have no registry distribution path.
+
 ## Building
 
 ```bash
