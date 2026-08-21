@@ -1,6 +1,13 @@
 # Sensitive registry workflow, governance, and configuration paths
 .github/workflows/** @sayeed205
-scripts/**           @sayeed205
 owners.toml          @sayeed205
 CODEOWNERS           @sayeed205
 .github/CODEOWNERS   @sayeed205
+
+# The generator crate is executed inside the privileged publish workflow with the real
+# Ed25519 package- and index-signing keys as environment variables (see publish.yml's
+# "Sign packages and index" step). An unreviewed change here is a direct path to those
+# keys, so it needs the same protection as the workflows themselves.
+crates/generator/**  @sayeed205
+Cargo.toml           @sayeed205
+Cargo.lock           @sayeed205

@@ -11,7 +11,7 @@ fn test_real_extensions_directory_validates() {
     let extensions_dir = repo_root.join("extensions");
     let owners_file = repo_root.join("owners.toml");
 
-    let report = scan_and_validate(&extensions_dir, &owners_file, None, None).unwrap();
+    let report = scan_and_validate(&extensions_dir, &owners_file, None, None, None).unwrap();
     assert!(report.extensions_count >= 3);
 }
 
@@ -48,7 +48,7 @@ executable = "run.sh"
     )
     .unwrap();
 
-    let result = scan_and_validate(&ext_dir, &owners_file, Some("sayeed205"), None);
+    let result = scan_and_validate(&ext_dir, &owners_file, Some("sayeed205"), None, None);
     assert!(result.is_err());
     let err = result.unwrap_err();
     assert!(err.contains("unknown field `runtime`") || err.contains("runtime"));
@@ -92,7 +92,7 @@ path = "extension.wasm"
     )
     .unwrap();
 
-    let result = scan_and_validate(&ext_dir, &owners_file, Some("bob"), None);
+    let result = scan_and_validate(&ext_dir, &owners_file, Some("bob"), None, None);
     assert!(result.is_err());
     let err = result.unwrap_err();
     assert!(err.contains("PR author is 'bob'"));
@@ -130,7 +130,7 @@ path = "extension.wasm"
     )
     .unwrap();
 
-    let result = scan_and_validate(&ext_dir, &owners_file, Some("sayeed205"), None);
+    let result = scan_and_validate(&ext_dir, &owners_file, Some("sayeed205"), None, None);
     assert!(result.is_err());
     let err = result.unwrap_err();
     assert!(err.contains("invalid author"));

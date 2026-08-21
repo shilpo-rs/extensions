@@ -38,6 +38,19 @@ enum Commands {
 
         #[arg(long, default_value = "schema/registry-index-v1.schema.json")]
         schema_file: PathBuf,
+
+        /// Extension directory name (under extensions/) that this PR actually changed.
+        /// Repeatable. Only has an effect when --scope-to-diff is also passed.
+        #[arg(long = "changed-dir")]
+        changed_dirs: Vec<String>,
+
+        /// Enforce namespace ownership only for the directories named by --changed-dir,
+        /// instead of every extension present in the tree. Pass this from CI, where the
+        /// changed-dir list (however many entries — including zero) reflects a real diff
+        /// against the PR's base branch. Omit it for a manual/ad hoc run with no diff to
+        /// scope to, where every extension should be checked regardless of --changed-dir.
+        #[arg(long)]
+        scope_to_diff: bool,
     },
 
     /// Generates canonical unsigned index.json from scanned extensions
@@ -78,6 +91,36 @@ enum Commands {
         #[arg(long, default_value = "schema/registry-index-v1.schema.json")]
         schema_file: PathBuf,
     },
+
+    /// Packs extensions into .shilpo-ext archives
+    Pack {
+        #[arg(long, default_value = "extensions")]
+        extensions_dir: PathBuf,
+
+        #[arg(long, default_value = "target/wasm32-wasip2/release")]
+        target_dir: PathBuf,
+
+        #[arg(long, default_value = "dist")]
+        output_dir: PathBuf,
+    },
+
+    /// Signs index and packages using Ed25519 private keys
+    Sign {
+        #[arg(long)]
+        unsigned_index: PathBuf,
+
+        #[arg(long)]
+        dist_dir: Option<PathBuf>,
+
+        #[arg(long, env = "INDEX_SIGNING_KEY")]
+        index_signing_key: String,
+
+        #[arg(long, env = "PACKAGE_SIGNING_KEY")]
+        package_signing_key: Option<String>,
+
+        #[arg(long, default_value = "index.json")]
+        output: PathBuf,
+    },
 }
 
 fn main() -> ExitCode {
@@ -90,16 +133,22 @@ fn main() -> ExitCode {
             pr_author,
             base_index,
             schema_file,
+            changed_dirs,
+            scope_to_diff,
         } => {
             println!(
                 "🔍 Validating extensions in '{}'...",
                 extensions_dir.display()
             );
+            let changed_set: std::collections::HashSet<String> =
+                changed_dirs.into_iter().collect();
+            let changed_dirs = scope_to_diff.then_some(&changed_set);
             match scan_and_validate(
                 &extensions_dir,
                 &owners_file,
                 pr_author.as_deref(),
                 base_index.as_deref(),
+                changed_dirs,
             ) {
                 Ok(report) => {
                     println!(
@@ -210,6 +259,73 @@ fn main() -> ExitCode {
                 schema_file.display()
             );
             ExitCode::SUCCESS
+        }
+
+        Commands::Pack {
+            extensions_dir,
+            target_dir,
+            output_dir,
+        } => {
+            match generator::pack_extensions(&extensions_dir, &target_dir, &output_dir) {
+                Ok(packed) => {
+                    println!("✅ Successfully packed {} extension(s):", packed.len());
+                    for p in packed {
+                        println!("   📦 {}", p.display());
+                    }
+                    ExitCode::SUCCESS
+                }
+                Err(err) => {
+                    eprintln!("❌ Packaging error: {err}");
+                    return ExitCode::FAILURE;
+                }
+            }
+        }
+
+        Commands::Sign {
+            unsigned_index,
+            dist_dir,
+            index_signing_key,
+            package_signing_key,
+            output,
+        } => {
+            let index = match generator::load_index_file(&unsigned_index) {
+                Ok(idx) => idx,
+                Err(err) => {
+                    eprintln!("❌ Failed to load unsigned index '{}': {err}", unsigned_index.display());
+                    return ExitCode::FAILURE;
+                }
+            };
+
+            match generator::sign_index_and_packages(
+                index,
+                dist_dir.as_deref(),
+                package_signing_key.as_deref(),
+                &index_signing_key,
+            ) {
+                Ok(signed) => {
+                    let json = match serde_json::to_string_pretty(&signed) {
+                        Ok(json) => json,
+                        Err(err) => {
+                            eprintln!("❌ JSON serialization error: {err}");
+                            return ExitCode::FAILURE;
+                        }
+                    };
+
+                    if let Some(parent) = output.parent() {
+                        let _ = fs::create_dir_all(parent);
+                    }
+                    if let Err(err) = fs::write(&output, format!("{json}\n")) {
+                        eprintln!("❌ Failed to write signed index '{}': {err}", output.display());
+                        return ExitCode::FAILURE;
+                    }
+                    println!("✅ Successfully signed index and written to '{}'.", output.display());
+                    ExitCode::SUCCESS
+                }
+                Err(err) => {
+                    eprintln!("❌ Signing error: {err}");
+                    return ExitCode::FAILURE;
+                }
+            }
         }
     }
 }
