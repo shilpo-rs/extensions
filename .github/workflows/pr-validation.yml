@@ -38,13 +38,11 @@ jobs:
           git fetch origin "${{ github.event.pull_request.base.ref }}"
           CHANGED_DIRS=$(git diff --name-only "origin/${{ github.event.pull_request.base.ref }}...HEAD" -- extensions/ \
             | cut -d/ -f2 | sort -u)
-          {
-            echo "args<<EOF"
-            for dir in $CHANGED_DIRS; do
-              echo "--changed-dir=$dir"
-            done
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
+          ARGS=""
+          for dir in $CHANGED_DIRS; do
+            ARGS="$ARGS --changed-dir=$dir"
+          done
+          echo "args=$ARGS" >> "$GITHUB_OUTPUT"
 
       - name: Validate extensions & check capability diffs
         run: |
