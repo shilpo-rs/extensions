@@ -5,6 +5,9 @@ on:
     tags:
       - "org.shilpo.wallpaper-v*"
 
+permissions:
+  contents: write
+
 jobs:
   release:
     uses: ./.github/workflows/release-extension.yml
