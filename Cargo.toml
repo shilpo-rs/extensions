@@ -1,5 +1,9 @@
 [workspace]
-members = ["wallpaper", "weather", "world-clock"]
+members = [
+    "extensions/org.shilpo.wallpaper",
+    "extensions/org.shilpo.weather",
+    "extensions/io.github.alice.world-clock",
+]
 resolver = "2"
 
 [workspace.package]

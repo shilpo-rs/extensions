@@ -1,0 +1,12 @@
+# Shilpo Extension Registry Namespace Ownership
+# Maps extension ID namespace prefixes to authorized GitHub login usernames.
+#
+# Namespace policy:
+# - "org.shilpo": Reserved for official Shilpo maintainers.
+# - "io.github.<login>": Community namespaces bound to the submitter's GitHub login.
+#
+# Note: Changes to this file require maintainer CODEOWNERS approval.
+
+[namespaces]
+"org.shilpo" = ["sayeed205"]
+"io.github.alice" = ["alice"]
