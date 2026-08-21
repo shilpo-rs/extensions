@@ -1,0 +1,57 @@
+{
+  "index": {
+    "schema_version": 1,
+    "source_id": "shilpo",
+    "generated_at": "2026-08-21T16:51:08+05:30",
+    "releases": [
+      {
+        "id": "org.shilpo.weather",
+        "name": "Weather",
+        "description": "Current weather from Open-Meteo in the Shilpo bar.",
+        "publisher": "Sayeed Ahmed <sayeed205@gmail.com>",
+        "version": "1.0.0",
+        "api_version": "0.2.0",
+        "min_shilpo_version": "0.2.0",
+        "channel": "stable",
+        "package_url": "https://github.com/shilpo-rs/extensions/releases/download/org.shilpo.weather-v1.0.0/org.shilpo.weather-1.0.0.shilpo-ext",
+        "package_hash": "sha256:1935eda6b175932e15ebd5b91f8aec274469404867e7bfdfd312a15e09cd1715",
+        "publisher_public_key": "53vvrUs56xU6JL1TbAoVJF/leiFFJ+4zedPQWDCGb/I=",
+        "publisher_signature": "jJndIJHWLGZRlFkRsBTvi/Ly7lRRZFqLTIoKhyMSa9KZficmVB7F0eqvcHltbAVhrQCF2LBDflSMSurz5/8qCA==",
+        "capabilities_hash": "sha256:51a360e15b4aa353eaaef3aaddeff2a66d073e8cce2b7a697ba034b4cc6cccb5",
+        "capabilities": [
+          {
+            "kind": "events:subscribe",
+            "events": [
+              "network_changed",
+              "timer_fired"
+            ]
+          },
+          {
+            "kind": "network:http",
+            "hosts": [
+              "geocoding-api.open-meteo.com",
+              "api.open-meteo.com",
+              "ipwho.is"
+            ],
+            "paths": [
+              "/v1/search*",
+              "/v1/forecast*",
+              "/"
+            ]
+          },
+          {
+            "kind": "location:read"
+          }
+        ],
+        "published_at": "2026-08-21T16:51:08+05:30",
+        "yanked": false,
+        "official": true,
+        "verified_publisher": true,
+        "open_source": true,
+        "data_only": false,
+        "key_rotation": null
+      }
+    ]
+  },
+  "signature": "1AH4fAqKzXCAik2Iq3N+X6IOtCb3Agv+0u7ITJO4YB4UKGpK3G9fqyM2hoCUDZvd5LOTAzeZQ5bZPdxV5qNQBQ=="
+}
