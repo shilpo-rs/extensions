@@ -292,10 +292,12 @@ pub fn generate_index(options: &GeneratorOptions) -> Result<RegistryIndex, Strin
 
     // Merge with previous index releases
     let mut all_releases_map: BTreeMap<(String, Version), RegistryRelease> = BTreeMap::new();
+    let mut previous_counter: Option<u64> = None;
 
     if let Some(prev_path) = &options.previous_index_path {
         if prev_path.is_file() {
             let prev_index = load_index_file(prev_path)?;
+            previous_counter = Some(prev_index.counter);
             for release in prev_index.releases {
                 let key = (release.id.to_string(), release.version.clone());
                 all_releases_map.insert(key, release);
@@ -330,6 +332,12 @@ pub fn generate_index(options: &GeneratorOptions) -> Result<RegistryIndex, Strin
         schema_version: REGISTRY_SCHEMA_VERSION,
         source_id: options.source_id.clone(),
         generated_at: published_at,
+        // Every signed index this generator produces increments the counter from whatever
+        // the previous committed index had, so clients can reject a stale-but-validly-signed
+        // replay (see #297 in shilpo-rs/shilpo). No previous index — including one that
+        // predates this field entirely, which deserializes with counter 0 — means this is
+        // the baseline, so 0 is correct there too.
+        counter: previous_counter.map_or(0, |counter| counter + 1),
         releases,
     })
 }

@@ -16,8 +16,8 @@ name = "shilpo-registry-generator"
 path = "src/main.rs"
 
 [dependencies]
-shilpo-registry-contract = { git = "https://github.com/shilpo-rs/shilpo", rev = "cf284bb1dff6f3cbf8a628c9ba140da8358025fa" }
-shilpo-ext-api = { git = "https://github.com/shilpo-rs/shilpo", rev = "cf284bb1dff6f3cbf8a628c9ba140da8358025fa" }
+shilpo-registry-contract = { git = "https://github.com/shilpo-rs/shilpo", rev = "8e76197d9cdb2a142877e7dbec55aaa0a98ba68c" }
+shilpo-ext-api = { git = "https://github.com/shilpo-rs/shilpo", rev = "8e76197d9cdb2a142877e7dbec55aaa0a98ba68c" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 toml = "0.8"

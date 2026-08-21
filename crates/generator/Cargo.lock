@@ -144,7 +144,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1aa79e62e7697b8e29b513a68abacf485adcd1fe8284a4316c5ae868e6633327"
 dependencies = [
  "iana-time-zone",
+ "js-sys",
  "num-traits",
+ "wasm-bindgen",
  "windows-link",
 ]
 
@@ -781,7 +783,7 @@ dependencies = [
 [[package]]
 name = "shilpo-ext-api"
 version = "0.1.0"
-source = "git+https://github.com/shilpo-rs/shilpo?rev=cf284bb1dff6f3cbf8a628c9ba140da8358025fa#cf284bb1dff6f3cbf8a628c9ba140da8358025fa"
+source = "git+https://github.com/shilpo-rs/shilpo?rev=8e76197d9cdb2a142877e7dbec55aaa0a98ba68c#8e76197d9cdb2a142877e7dbec55aaa0a98ba68c"
 dependencies = [
  "schemars",
  "semver",
@@ -794,9 +796,10 @@ dependencies = [
 [[package]]
 name = "shilpo-registry-contract"
 version = "0.1.0"
-source = "git+https://github.com/shilpo-rs/shilpo?rev=cf284bb1dff6f3cbf8a628c9ba140da8358025fa#cf284bb1dff6f3cbf8a628c9ba140da8358025fa"
+source = "git+https://github.com/shilpo-rs/shilpo?rev=8e76197d9cdb2a142877e7dbec55aaa0a98ba68c#8e76197d9cdb2a142877e7dbec55aaa0a98ba68c"
 dependencies = [
  "base64 0.23.1",
+ "chrono",
  "hex",
  "ring",
  "schemars",
